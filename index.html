@@ -50,6 +50,12 @@
       font-size: 1.5rem;
       color: #007bff;
     }
+
+    #game-over {
+      font-size: 2rem;
+      color: red;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -57,6 +63,7 @@
 <div id="game-container">
   <h1 class="my-3">Catch the Ball Game</h1>
   <div id="score">Score: 0</div>
+  <div id="game-over">Game Over!</div>
   <div id="bucket"></div>
 </div>
 <button class="btn btn-primary mt-4" onclick="startGame()">Start Game</button>
@@ -64,9 +71,11 @@
 <script>
   let score = 0;
   let gameInterval;
+  let speed = 1000; // Initial speed in milliseconds
   const gameContainer = document.getElementById("game-container");
   const bucket = document.getElementById("bucket");
   const scoreDisplay = document.getElementById("score");
+  const gameOverDisplay = document.getElementById("game-over");
 
   // Bucket movement
   document.addEventListener("mousemove", (e) => {
@@ -80,14 +89,32 @@
   // Start the game
   function startGame() {
     score = 0;
+    speed = 1000; // Reset speed
+    gameOverDisplay.style.display = 'none';
     updateScore();
     clearInterval(gameInterval);
-    gameInterval = setInterval(createBall, 1000);
+    gameInterval = setInterval(createBall, speed);
+    setInterval(increaseSpeed, 5000); // Increase speed every 5 seconds
   }
 
   // Update the score display
   function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  // End the game
+  function endGame() {
+    clearInterval(gameInterval);
+    gameOverDisplay.style.display = 'block';
+  }
+
+  // Gradually increase the falling speed
+  function increaseSpeed() {
+    if (speed > 200) { // Set a minimum speed limit
+      speed -= 100;
+      clearInterval(gameInterval);
+      gameInterval = setInterval(createBall, speed);
+    }
   }
 
   // Create a falling ball
@@ -112,9 +139,10 @@
           updateScore();
           clearInterval(ballInterval);
           ball.remove();
-        } else if (ballY > gameContainer.offsetHeight) {
+        } else {
           clearInterval(ballInterval);
           ball.remove();
+          endGame(); // End the game if a ball is missed
         }
       }
     }, 20);
