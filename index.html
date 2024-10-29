@@ -52,7 +52,7 @@
     }
 
     #game-over {
-      font-size: 2rem;
+      font-size: 1.5rem;
       color: red;
       display: none;
     }
@@ -63,13 +63,14 @@
 <div id="game-container">
   <h1 class="my-3">Catch the Ball Game</h1>
   <div id="score">Score: 0</div>
-  <div id="game-over">Game Over!</div>
+  <div id="game-over">You missed five balls! Best of luck; try again to get a higher score!</div>
   <div id="bucket"></div>
 </div>
 <button class="btn btn-primary mt-4" onclick="startGame()">Start Game</button>
 
 <script>
   let score = 0;
+  let missedBalls = 0;
   let gameInterval;
   let speed = 1000; // Initial speed in milliseconds
   const gameContainer = document.getElementById("game-container");
@@ -89,6 +90,7 @@
   // Start the game
   function startGame() {
     score = 0;
+    missedBalls = 0;
     speed = 1000; // Reset speed
     gameOverDisplay.style.display = 'none';
     updateScore();
@@ -102,7 +104,7 @@
     scoreDisplay.textContent = `Score: ${score}`;
   }
 
-  // End the game
+  // End the game after missing five balls
   function endGame() {
     clearInterval(gameInterval);
     gameOverDisplay.style.display = 'block';
@@ -140,9 +142,12 @@
           clearInterval(ballInterval);
           ball.remove();
         } else {
+          missedBalls++;
           clearInterval(ballInterval);
           ball.remove();
-          endGame(); // End the game if a ball is missed
+          if (missedBalls >= 5) {
+            endGame();
+          }
         }
       }
     }, 20);
