@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catch the Ball Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 80vh;
+      background-color: #f8f9fa;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    #bucket {
+      position: absolute;
+      bottom: 10px;
+      width: 80px;
+      height: 20px;
+      background-color: #ff4500;
+      border-radius: 5px;
+    }
+
+    .ball {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #007bff;
+      border-radius: 50%;
+    }
+
+    #score {
+      font-size: 1.5rem;
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <h1 class="my-3">Catch the Ball Game</h1>
+  <div id="score">Score: 0</div>
+  <div id="bucket"></div>
+</div>
+<button class="btn btn-primary mt-4" onclick="startGame()">Start Game</button>
+
+<script>
+  let score = 0;
+  let gameInterval;
+  const gameContainer = document.getElementById("game-container");
+  const bucket = document.getElementById("bucket");
+  const scoreDisplay = document.getElementById("score");
+
+  // Bucket movement
+  document.addEventListener("mousemove", (e) => {
+    const containerRect = gameContainer.getBoundingClientRect();
+    let bucketX = e.clientX - containerRect.left - bucket.offsetWidth / 2;
+    if (bucketX < 0) bucketX = 0;
+    if (bucketX > containerRect.width - bucket.offsetWidth) bucketX = containerRect.width - bucket.offsetWidth;
+    bucket.style.left = bucketX + "px";
+  });
+
+  // Start the game
+  function startGame() {
+    score = 0;
+    updateScore();
+    clearInterval(gameInterval);
+    gameInterval = setInterval(createBall, 1000);
+  }
+
+  // Update the score display
+  function updateScore() {
+    scoreDisplay.textContent = `Score: ${score}`;
+  }
+
+  // Create a falling ball
+  function createBall() {
+    const ball = document.createElement("div");
+    ball.classList.add("ball");
+    gameContainer.appendChild(ball);
+
+    let ballX = Math.floor(Math.random() * (gameContainer.offsetWidth - 20));
+    let ballY = 0;
+    ball.style.left = ballX + "px";
+
+    // Ball falling animation
+    const ballInterval = setInterval(() => {
+      ballY += 5;
+      ball.style.top = ballY + "px";
+
+      // Check if ball reaches the bottom
+      if (ballY > gameContainer.offsetHeight - 40) {
+        if (checkCatch(ball, bucket)) {
+          score++;
+          updateScore();
+          clearInterval(ballInterval);
+          ball.remove();
+        } else if (ballY > gameContainer.offsetHeight) {
+          clearInterval(ballInterval);
+          ball.remove();
+        }
+      }
+    }, 20);
+  }
+
+  // Check if ball is caught by the bucket
+  function checkCatch(ball, bucket) {
+    const ballRect = ball.getBoundingClientRect();
+    const bucketRect = bucket.getBoundingClientRect();
+    return !(ballRect.right < bucketRect.left || 
+             ballRect.left > bucketRect.right || 
+             ballRect.bottom < bucketRect.top || 
+             ballRect.top > bucketRect.bottom);
+  }
+</script>
+</body>
+</html>
