@@ -73,6 +73,7 @@
   let missedBalls = 0;
   let gameInterval;
   let speed = 1000; // Initial speed in milliseconds
+  let gameActive = false;
   const gameContainer = document.getElementById("game-container");
   const bucket = document.getElementById("bucket");
   const scoreDisplay = document.getElementById("score");
@@ -80,6 +81,7 @@
 
   // Bucket movement
   document.addEventListener("mousemove", (e) => {
+    if (!gameActive) return; // Stop bucket movement if game is not active
     const containerRect = gameContainer.getBoundingClientRect();
     let bucketX = e.clientX - containerRect.left - bucket.offsetWidth / 2;
     if (bucketX < 0) bucketX = 0;
@@ -92,6 +94,7 @@
     score = 0;
     missedBalls = 0;
     speed = 1000; // Reset speed
+    gameActive = true; // Set game as active
     gameOverDisplay.style.display = 'none';
     updateScore();
     clearInterval(gameInterval);
@@ -107,12 +110,13 @@
   // End the game after missing five balls
   function endGame() {
     clearInterval(gameInterval);
+    gameActive = false; // Set game as inactive
     gameOverDisplay.style.display = 'block';
   }
 
   // Gradually increase the falling speed
   function increaseSpeed() {
-    if (speed > 200) { // Set a minimum speed limit
+    if (speed > 200 && gameActive) { // Increase speed only if game is active
       speed -= 100;
       clearInterval(gameInterval);
       gameInterval = setInterval(createBall, speed);
@@ -121,6 +125,8 @@
 
   // Create a falling ball
   function createBall() {
+    if (!gameActive) return; // Stop creating balls if game is inactive
+
     const ball = document.createElement("div");
     ball.classList.add("ball");
     gameContainer.appendChild(ball);
@@ -131,6 +137,11 @@
 
     // Ball falling animation
     const ballInterval = setInterval(() => {
+      if (!gameActive) {
+        clearInterval(ballInterval); // Stop ball animation if game is inactive
+        return;
+      }
+
       ballY += 5;
       ball.style.top = ballY + "px";
 
